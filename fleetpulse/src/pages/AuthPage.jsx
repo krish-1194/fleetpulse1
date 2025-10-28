@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { setAccessToken, fetchWithAuth } from '../utils/api';
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
@@ -15,16 +16,17 @@ const AuthPage = () => {
 
     try {
         const payload = endpoint === 'register' ? { username, email, password } : { email, password };
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/${endpoint}`, {
+        const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/auth/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        credentials: 'include', // Important: Ensures cookies (refresh token) are sent/received
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('token', data.token);
+        setAccessToken(data.accessToken); // Store the new accessToken
         navigate('/'); // Redirect to home page on success
       } else {
         setError(data.message || `An error occurred during ${endpoint}.`);

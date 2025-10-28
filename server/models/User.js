@@ -24,6 +24,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  refreshToken: String, // Field to store the hashed refresh token
 }, { timestamps: true });
 
 // Hash the password before saving the user

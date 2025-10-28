@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
+import { fetchWithAuth, clearTokens } from '../utils/api';
 
 const AddVehiclePage = () => {
   const navigate = useNavigate();
@@ -14,19 +15,15 @@ const AddVehiclePage = () => {
     e.preventDefault();
     setError('');
 
-    const vehicleData = { name, year, location, imageUrl };
+    const vehicleData = { name, year: parseInt(year), location, imageUrl };
 
-    // TODO: Implement the backend API call to save the vehicle data.
-    // For now, we'll just log it and navigate back to the home page.
     console.log('Submitting vehicle data:', vehicleData);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/vehicles`, {
+      const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/vehicles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(vehicleData),
       });
@@ -36,9 +33,16 @@ const AddVehiclePage = () => {
       } else {
         const data = await response.json();
         setError(data.message || 'Failed to add vehicle.');
+        if (response.status === 401) {
+            await clearTokens();
+            navigate('/login');
+        }
       }
     } catch (err) {
-      setError('Could not connect to the server.');
+      console.error("Error adding vehicle:", err);
+      setError('Could not connect to the server or authentication failed.');
+      await clearTokens();
+      navigate('/login');
     }
   };
 

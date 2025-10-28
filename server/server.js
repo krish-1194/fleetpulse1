@@ -1,12 +1,29 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const envPath = path.join(__dirname, '../.env');
 
-dotenv.config({ path: envPath });
+// Manually load and set environment variables from .env
+try {
+  const envFileContent = fs.readFileSync(envPath, 'utf8');
+  const lines = envFileContent.split(/\r?\n/).filter(line => line.trim() !== ''); // Filter out empty lines
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    if (trimmedLine && !trimmedLine.startsWith('#')) {
+      const [key, ...valueParts] = trimmedLine.split('=');
+      const value = valueParts.join('=');
+      if (key && value !== undefined && process.env[key] === undefined) {
+        process.env[key] = value;
+      }
+    }
+  }
+} catch (error) {
+  console.error('Error manually loading .env file:', error);
+}
 
 // Check if JWT_SECRET is defined after dotenv has loaded
 if (!process.env.JWT_SECRET) {
@@ -14,22 +31,28 @@ if (!process.env.JWT_SECRET) {
   process.exit(1); // Exit the application if the secret is missing
 }
 
-// Log confirmation that environment variables are loaded (optional, remove in production)
-console.log('Environment variables loaded successfully from:', envPath);
-console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Loaded' : 'Not Loaded');
-console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'Loaded' : 'Not Loaded');
-console.log('PORT:', process.env.PORT);
+if (!process.env.REFRESH_TOKEN_SECRET) {
+  console.error('FATAL ERROR: REFRESH_TOKEN_SECRET is not defined in environment variables. Please set it in your .env file in the project root.');
+  process.exit(1); // Exit the application if the secret is missing
+}
+
+if (!process.env.FRONTEND_ORIGIN) {
+  console.error('FATAL ERROR: FRONTEND_ORIGIN is not defined in environment variables. Please set it in your .env file in the project root.');
+  process.exit(1); // Exit the application if the origin is missing
+}
 
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import cookieParser from 'cookie-parser'; // Import cookie-parser
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors()); // Enable Cross-Origin Resource Sharing
+app.use(cors({ credentials: true, origin: process.env.FRONTEND_ORIGIN })); // Use FRONTEND_ORIGIN as origin
 app.use(express.json()); // Enable parsing of JSON bodies
+app.use(cookieParser()); // Use cookie-parser middleware
 
 // --- MongoDB Connection ---
 mongoose.connect(process.env.MONGODB_URI)

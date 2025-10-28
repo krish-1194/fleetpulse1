@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
+import { fetchWithAuth, clearTokens } from '../utils/api';
 
 const UpdateVehiclePage = () => {
   const { id } = useParams();
@@ -21,37 +22,28 @@ const UpdateVehiclePage = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-          if (response.ok) {
-            const userData = await response.json();
-            setCurrentUser(userData);
-          } else {
-            console.error("Failed to fetch user data:", response.statusText);
+      try {
+        const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`);
+        if (response.ok) {
+          const userData = await response.json();
+          setCurrentUser(userData);
+        } else {
+          console.error("Failed to fetch user data:", response.statusText);
+          if (response.status === 401) {
+            await clearTokens();
+            navigate('/login');
           }
-        } catch (err) {
-          console.error("Error fetching user data:", err);
         }
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        await clearTokens();
+        navigate('/login');
       }
     };
 
     const fetchVehicleData = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/vehicles/${id}`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
+        const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/vehicles/${id}`);
 
         if (response.ok) {
           const data = await response.json();
@@ -66,9 +58,15 @@ const UpdateVehiclePage = () => {
           setRegistrationNo(data.registrationNo || ''); // Initialize registrationNo state
         } else {
           setError('Vehicle not found or you do not have permission to edit it.');
+          if (response.status === 401) {
+            await clearTokens();
+            navigate('/login');
+          }
         }
       } catch (err) {
-        setError('Could not connect to the server.');
+        setError('Could not connect to the server or authentication failed.');
+        await clearTokens();
+        navigate('/login');
       } finally {
         setIsLoading(false);
       }
@@ -83,20 +81,13 @@ const UpdateVehiclePage = () => {
     setError('');
     setMessage('');
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-
     const updatedVehicle = { name, year: parseInt(year), location, imageUrl, fuelType, registeredName, transmissionType, registrationNo };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/vehicles/${id}`, {
+      const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/vehicles/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(updatedVehicle),
       });
@@ -107,10 +98,16 @@ const UpdateVehiclePage = () => {
       } else {
         const data = await response.json();
         setError(data.message || 'Failed to update vehicle.');
+        if (response.status === 401) {
+            await clearTokens();
+            navigate('/login');
+        }
       }
     } catch (err) {
       console.error("Error updating vehicle:", err);
-      setError('Could not connect to the server to update vehicle.');
+      setError('Could not connect to the server to update vehicle or authentication failed.');
+      await clearTokens();
+      navigate('/login');
     }
   };
 

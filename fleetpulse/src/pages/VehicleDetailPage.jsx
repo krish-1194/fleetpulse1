@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import FuelLogCard from '../components/FuelLogCard';
 import MaintenanceLogCard from '../components/MaintenanceLogCard';
 import InsuranceLogCard from '../components/InsuranceLogCard';
+import { fetchWithAuth, clearTokens } from '../utils/api';
 
 const VehicleDetailPage = () => {
   const { id } = useParams();
@@ -15,44 +16,43 @@ const VehicleDetailPage = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-          if (response.ok) {
-            const userData = await response.json();
-            setCurrentUser(userData);
-          } else {
-            console.error("Failed to fetch user data:", response.statusText);
-            // Optionally, handle token expiration or invalid token by logging out user
+      try {
+        const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`);
+        if (response.ok) {
+          const userData = await response.json();
+          setCurrentUser(userData);
+        } else {
+          console.error("Failed to fetch user data:", response.statusText);
+          if (response.status === 401) {
+            await clearTokens();
+            navigate('/login');
           }
-        } catch (err) {
-          console.error("Error fetching user data:", err);
         }
-      } else {
-        navigate('/login'); // Redirect if no token
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        await clearTokens();
+        navigate('/login');
       }
     };
 
     const fetchVehicle = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/vehicles/${id}`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
+        const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/vehicles/${id}`);
 
         if (response.ok) {
           const data = await response.json();
           setVehicle(data);
         } else {
           setError('Vehicle not found or you do not have permission to view it.');
+          if (response.status === 401) {
+            await clearTokens();
+            navigate('/login');
+          }
         }
       } catch (err) {
-        setError('Could not connect to the server.');
+        setError('Could not connect to the server or authentication failed.');
+        await clearTokens();
+        navigate('/login');
       } finally {
         setIsLoading(false);
       }

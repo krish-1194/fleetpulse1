@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { Link, useNavigate } from 'react-router-dom';
+import { fetchWithAuth, clearTokens } from '../utils/api';
 
 const EditProfilePage = () => {
   const navigate = useNavigate();
@@ -15,31 +16,29 @@ const EditProfilePage = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-          if (response.ok) {
-            const userData = await response.json();
-            setCurrentUser(userData);
-            setUsername(userData.username || ''); // Initialize username state
-            setPhoneNumber(userData.phoneNumber || ''); // Initialize phone number state
-          } else {
-            console.error("Failed to fetch user data:", response.statusText);
-            setError('Failed to load user profile for editing.');
+      try {
+        const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`);
+        
+        if (response.ok) {
+          const userData = await response.json();
+          setCurrentUser(userData);
+          setUsername(userData.username || ''); // Initialize username state
+          setPhoneNumber(userData.phoneNumber || ''); // Initialize phone number state
+        } else {
+          console.error("Failed to fetch user data:", response.statusText);
+          setError('Failed to load user profile for editing.');
+          if (response.status === 401) {
+            await clearTokens();
+            navigate('/login');
           }
-        } catch (err) {
-          console.error("Error fetching user data:", err);
-          setError('Could not connect to the server.');
-        } finally {
-          setIsLoading(false);
         }
-      } else {
-        navigate('/login'); // Redirect if no token
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        setError('Could not connect to the server or authentication failed.');
+        await clearTokens();
+        navigate('/login');
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchUserData();
@@ -65,18 +64,11 @@ const EditProfilePage = () => {
       return;
     }
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/profile`, {
+      const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ username, phoneNumber, password }),
       });
@@ -91,10 +83,16 @@ const EditProfilePage = () => {
       } else {
         const data = await response.json();
         setError(data.message || 'Failed to update profile.');
+        if (response.status === 401) {
+            await clearTokens();
+            navigate('/login');
+        }
       }
     } catch (err) {
       console.error("Error updating profile:", err);
-      setError('Could not connect to the server to update profile.');
+      setError('Could not connect to the server to update profile or authentication failed.');
+      await clearTokens();
+      navigate('/login');
     }
   };
 

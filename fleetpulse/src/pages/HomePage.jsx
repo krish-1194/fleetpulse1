@@ -1,49 +1,62 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import VehicleCard from '../components/VehicleCard';
+import { fetchWithAuth, clearTokens } from '../utils/api';
 
 const HomePage = () => {
   const [vehicles, setVehicles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredVehicles, setFilteredVehicles] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const navigate = useNavigate(); // Add useNavigate hook
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-          if (response.ok) {
-            const userData = await response.json();
-            setCurrentUser(userData);
-          } else {
-            console.error("Failed to fetch user data:", response.statusText);
-            // Optionally, handle token expiration or invalid token by logging out user
+      try {
+        const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`);
+        if (response.ok) {
+          const userData = await response.json();
+          setCurrentUser(userData);
+        } else {
+          console.error("Failed to fetch user data:", response.statusText);
+          if (response.status === 401) {
+            await clearTokens();
+            navigate('/login');
           }
-        } catch (err) {
-          console.error("Error fetching user data:", err);
         }
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        await clearTokens();
+        navigate('/login');
       }
     };
 
     const fetchVehicles = async () => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/vehicles`, { headers: { 'Authorization': `Bearer ${token}` } });
-      const data = await response.json();
-      const mappedVehicles = data.map(v => ({ ...v, id: v._id }));
-      setVehicles(mappedVehicles);
-      setFilteredVehicles(mappedVehicles); // Initialize filtered vehicles with all vehicles
+      try {
+        const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/vehicles`);
+        if (response.ok) {
+          const data = await response.json();
+          const mappedVehicles = data.map(v => ({ ...v, id: v._id }));
+          setVehicles(mappedVehicles);
+          setFilteredVehicles(mappedVehicles); // Initialize filtered vehicles with all vehicles
+        } else {
+          console.error("Failed to fetch vehicles:", response.statusText);
+          if (response.status === 401) {
+            await clearTokens();
+            navigate('/login');
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching vehicles:", err);
+        await clearTokens();
+        navigate('/login');
+      }
     };
 
     fetchUserData();
-    fetchVehicles().catch(err => console.error("Failed to fetch vehicles:", err));
-  }, []);
+    fetchVehicles(); // Removed .catch, error handling is inside fetchVehicles now
+  }, [navigate]);
 
   useEffect(() => {
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
@@ -78,13 +91,11 @@ const HomePage = () => {
   };
 
   const onToggleFavorite = async (vehicleId, newFavoriteStatus) => {
-    const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/vehicles/${vehicleId}`, {
+      const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/vehicles/${vehicleId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ isFavorited: newFavoriteStatus }),
       });
@@ -95,9 +106,15 @@ const HomePage = () => {
         );
       } else {
         console.error("Failed to update favorite status:", response.statusText);
+        if (response.status === 401) {
+            await clearTokens();
+            navigate('/login');
+        }
       }
     } catch (error) {
       console.error("Error updating favorite status:", error);
+      await clearTokens();
+      navigate('/login');
     }
   };
 

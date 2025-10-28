@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
+import { fetchWithAuth, clearTokens } from '../utils/api';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -8,8 +9,8 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
+  const handleLogout = async () => {
+    await clearTokens(); // Clear tokens (including backend cookie)
     navigate('/login');
   };
 
@@ -20,10 +21,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
+        const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`);
 
         if (response.ok) {
           const data = await response.json();
@@ -31,17 +29,22 @@ const ProfilePage = () => {
         } else {
           console.error("Failed to fetch user data:", response.statusText); // Log actual error
           setError('Failed to fetch user profile.');
+          if (response.status === 401) {
+            navigate('/login'); // Redirect to login if unauthorized even after refresh attempt
+          }
         }
       } catch (err) {
         console.error("Error fetching user data:", err); // Log actual error
-        setError('Could not connect to the server.');
+        setError('Could not connect to the server or authentication failed.');
+        await clearTokens(); // Clear tokens if an error occurs (e.g., refresh token expired/invalid)
+        navigate('/login');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchUserProfile();
-  }, []);
+  }, [navigate]);
 
   if (isLoading) {
     return <div className="min-h-screen bg-gray-900 text-white text-center p-8">Loading profile...</div>;

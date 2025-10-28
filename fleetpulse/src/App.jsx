@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useNavigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
@@ -8,6 +8,7 @@ import VehicleDetailPage from './pages/VehicleDetailPage';
 import EditProfilePage from './pages/EditProfilePage';
 import UpdateVehiclePage from './pages/UpdateVehiclePage';
 import SplashScreen from './components/SplashScreen';
+import { getAccessToken, clearTokens, fetchWithAuth } from './utils/api';
 
 /**
  * A component to protect routes.
@@ -15,8 +16,51 @@ import SplashScreen from './components/SplashScreen';
  * If not, it redirects the user to the /login page.
  */
 const ProtectedRoute = () => {
-  const token = localStorage.getItem('token');
-  return token ? <Outlet /> : <Navigate to="/login" />;
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const verifyAuth = async () => {
+      try {
+        const token = getAccessToken();
+        if (!token) {
+          setIsAuthenticated(false);
+          setIsLoadingAuth(false);
+          navigate('/login');
+          return;
+        }
+
+        // Try to fetch user profile using fetchWithAuth to trigger token refresh if needed
+        const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`);
+        
+        if (response.ok) {
+          setIsAuthenticated(true);
+        } else {
+          // If response is not ok, and fetchWithAuth didn't throw (meaning refresh also failed)
+          // Then it's an unauthenticated state.
+          setIsAuthenticated(false);
+          await clearTokens(); // Ensure tokens are cleared
+          navigate('/login');
+        }
+      } catch (error) {
+        console.error("Authentication check failed:", error);
+        setIsAuthenticated(false);
+        await clearTokens(); // Ensure tokens are cleared if an error occurred during refresh
+        navigate('/login');
+      } finally {
+        setIsLoadingAuth(false);
+      }
+    };
+
+    verifyAuth();
+  }, [navigate]);
+
+  if (isLoadingAuth) {
+    return <div className="min-h-screen bg-gray-900 text-white text-center p-8">Authenticating...</div>;
+  }
+
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
 };
 
 /**
