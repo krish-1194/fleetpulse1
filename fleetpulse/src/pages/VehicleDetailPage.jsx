@@ -6,10 +6,35 @@ const VehicleDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [vehicle, setVehicle] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null); // New state for currentUser
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          if (response.ok) {
+            const userData = await response.json();
+            setCurrentUser(userData);
+          } else {
+            console.error("Failed to fetch user data:", response.statusText);
+            // Optionally, handle token expiration or invalid token by logging out user
+          }
+        } catch (err) {
+          console.error("Error fetching user data:", err);
+        }
+      } else {
+        navigate('/login'); // Redirect if no token
+      }
+    };
+
     const fetchVehicle = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -30,8 +55,9 @@ const VehicleDetailPage = () => {
       }
     };
 
+    fetchUserData();
     fetchVehicle();
-  }, [id]);
+  }, [id, navigate]); // Add navigate to dependency array
 
   if (isLoading) {
     return <div className="min-h-screen bg-gray-900 text-white text-center p-8">Loading vehicle details...</div>;
@@ -43,7 +69,7 @@ const VehicleDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <Header />
+      <Header currentUser={currentUser} />
       <main className="container mx-auto p-4 md:p-8">
         {vehicle ? (
           <div className="bg-gray-800 p-8 rounded-lg shadow-xl max-w-4xl mx-auto">

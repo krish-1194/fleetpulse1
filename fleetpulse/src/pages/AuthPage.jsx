@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState(''); // New state for username
   const [error, setError] = useState('');
   const [currentView, setCurrentView] = useState('login'); // 'login' or 'signup'
   const navigate = useNavigate();
@@ -13,10 +14,11 @@ const AuthPage = () => {
     setError('');
 
     try {
+        const payload = endpoint === 'register' ? { username, email, password } : { email, password };
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -84,6 +86,7 @@ const AuthPage = () => {
                   setError('');
                   setEmail('');
                   setPassword('');
+                  setUsername(''); // Clear username on view switch
                 }}
                 // Use button styles that look like a link
                 className="font-medium text-sky-400 hover:underline bg-transparent border-none p-0 cursor-pointer"
@@ -98,6 +101,20 @@ const AuthPage = () => {
           <img src="/logo192.png" alt="FleetPulse Logo" className="w-20 h-20 mb-4" />
           <h2 className="text-3xl font-bold text-center text-white mb-6">Create Your FleetPulse Account</h2>
           <form onSubmit={(e) => handleAuth(e, 'register')} className="space-y-6 w-full">
+            <div>
+              <label htmlFor="username-signup" className="block text-sm font-medium text-gray-300 mb-1">
+                Username
+              </label>
+              <input
+                type="text"
+                id="username-signup"
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                placeholder="Choose a username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
             <div>
               <label htmlFor="email-signup" className="block text-sm font-medium text-gray-300 mb-1">
                 Email Address
@@ -142,6 +159,7 @@ const AuthPage = () => {
                   setError('');
                   setEmail('');
                   setPassword('');
+                  setUsername('');
                 }}
                 // Use button styles that look like a link
                 className="font-medium text-sky-400 hover:underline bg-transparent border-none p-0 cursor-pointer"

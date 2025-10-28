@@ -5,6 +5,7 @@ import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import AddVehiclePage from './pages/AddVehiclePage';
 import VehicleDetailPage from './pages/VehicleDetailPage';
+import EditProfilePage from './pages/EditProfilePage';
 import SplashScreen from './components/SplashScreen';
 
 /**
@@ -51,6 +52,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/edit" element={<EditProfilePage />} />
           <Route path="/add-vehicle" element={<AddVehiclePage />} />
           <Route path="/vehicle/:id" element={<VehicleDetailPage />} />
         </Route>

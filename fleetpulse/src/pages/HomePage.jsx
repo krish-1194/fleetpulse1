@@ -131,13 +131,13 @@ const HomePage = () => {
           ))}
 
           {/* Add Vehicle Card */}
-          <Link to="/add-vehicle" className="block group">
-            <div className="h-full bg-slate-800 rounded-xl shadow-lg flex items-center justify-center border-2 border-dashed border-slate-600 hover:border-sky-500 hover:bg-slate-700 transition-all duration-300 ease-in-out">
+          <Link to="/add-vehicle" className="block group h-full">
+            <div className="bg-slate-800 rounded-xl shadow-lg flex flex-col items-center justify-center border-2 border-dashed border-slate-600 hover:border-sky-500 hover:bg-slate-700 transition-all duration-300 ease-in-out p-4 h-[212px]">
               <div className="text-center text-slate-400">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 mx-auto mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-16 h-16 mx-auto mb-2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                <span className="font-semibold">Add New Vehicle</span>
+                <span className="font-semibold text-lg">Add New Vehicle</span>
               </div>
             </div>
           </Link>
