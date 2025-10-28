@@ -23,6 +23,27 @@ const VehicleSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  fuelType: {
+    type: String,
+    required: [true, 'Please provide the fuel type'],
+    trim: true,
+  },
+  registeredName: {
+    type: String,
+    required: [true, 'Please provide the registered name'],
+    trim: true,
+  },
+  transmissionType: {
+    type: String,
+    required: [true, 'Please provide the transmission type'],
+    trim: true,
+  },
+  registrationNo: {
+    type: String,
+    required: [true, 'Please provide the registration number'],
+    unique: true,
+    trim: true,
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

@@ -18,7 +18,7 @@ export const getVehicles = async (req, res) => {
 // @route   POST /api/vehicles
 // @access  Private
 export const createVehicle = async (req, res) => {
-  const { name, year, location, imageUrl } = req.body;
+  const { name, year, location, imageUrl, fuelType, registeredName, transmissionType, registrationNo } = req.body;
 
   try {
     const vehicle = new Vehicle({
@@ -26,6 +26,10 @@ export const createVehicle = async (req, res) => {
       year,
       location,
       imageUrl,
+      fuelType,
+      registeredName,
+      transmissionType,
+      registrationNo,
       user: req.user.id, // Associate vehicle with the logged-in user
     });
 
@@ -64,6 +68,8 @@ export const getVehicleById = async (req, res) => {
 // @route   PUT /api/vehicles/:id
 // @access  Private
 export const updateVehicle = async (req, res) => {
+  const { name, year, location, imageUrl, fuelType, registeredName, transmissionType, registrationNo } = req.body;
+
   try {
     let vehicle = await Vehicle.findById(req.params.id);
 
@@ -76,7 +82,9 @@ export const updateVehicle = async (req, res) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
 
-    vehicle = await Vehicle.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const updateFields = { name, year, location, imageUrl, fuelType, registeredName, transmissionType, registrationNo };
+
+    vehicle = await Vehicle.findByIdAndUpdate(req.params.id, updateFields, { new: true, runValidators: true });
 
     res.json(vehicle);
   } catch (error) {

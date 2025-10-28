@@ -6,6 +6,7 @@ import ProfilePage from './pages/ProfilePage';
 import AddVehiclePage from './pages/AddVehiclePage';
 import VehicleDetailPage from './pages/VehicleDetailPage';
 import EditProfilePage from './pages/EditProfilePage';
+import UpdateVehiclePage from './pages/UpdateVehiclePage';
 import SplashScreen from './components/SplashScreen';
 
 /**
@@ -55,6 +56,7 @@ function App() {
           <Route path="/profile/edit" element={<EditProfilePage />} />
           <Route path="/add-vehicle" element={<AddVehiclePage />} />
           <Route path="/vehicle/:id" element={<VehicleDetailPage />} />
+          <Route path="/vehicle/:id/edit" element={<UpdateVehiclePage />} />
         </Route>
         {/* Redirect any other path to the home page for logged-in users, or login for others */}
         <Route path="*" element={<Navigate to="/" />} />
