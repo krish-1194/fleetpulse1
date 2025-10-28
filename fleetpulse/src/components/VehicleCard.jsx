@@ -16,12 +16,19 @@ const LocationIcon = memo(({ className }) => (
     </svg>
 ));
 
-const FavoriteButton = ({ isFavorite: initialIsFavorite }) => {
+const FavoriteButton = ({ isFavorite: initialIsFavorite, vehicleId, onToggle }) => {
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
 
-  const toggleFavorite = (e) => {
+  const toggleFavorite = async (e) => {
     e.preventDefault(); // Prevent Link navigation when favoriting
-    setIsFavorite(!isFavorite);
+    e.stopPropagation(); // Stop event propagation to avoid triggering parent Link
+
+    const newFavoriteStatus = !isFavorite;
+    setIsFavorite(newFavoriteStatus);
+
+    if (onToggle) {
+      onToggle(vehicleId, newFavoriteStatus);
+    }
   };
 
   return (
@@ -36,19 +43,30 @@ const FavoriteButton = ({ isFavorite: initialIsFavorite }) => {
   );
 };
 
-const VehicleCard = memo(({ vehicle, isInitiallyFavorited = false }) => {
+FavoriteButton.propTypes = {
+  isFavorite: PropTypes.bool.isRequired,
+  vehicleId: PropTypes.string.isRequired,
+  onToggle: PropTypes.func.isRequired,
+};
+
+const VehicleCard = memo(({ vehicle, onToggleFavorite }) => {
   const { 
     id,
     imageUrl,
     name = 'Vehicle Name', 
     year = 'Year', 
-    location = 'Unknown Location' 
+    location = 'Unknown Location', 
+    isFavorited = false // Ensure isFavorited defaults to false
   } = vehicle || {};
 
   return (
     <Link to={`/vehicle/${id}`} className="block group">
       <div className="bg-slate-800 rounded-xl shadow-lg overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-sky-500/20 group-hover:-translate-y-1 relative">
-        <FavoriteButton isFavorite={isInitiallyFavorited} />
+        <FavoriteButton 
+          isFavorite={isFavorited} 
+          vehicleId={id} 
+          onToggle={onToggleFavorite} 
+        />
         <div className="relative h-[180px]">
           <img
             src={imageUrl || "https://placehold.co/600x400/1e293b/94a3b8?text=Image+Not+Found"}

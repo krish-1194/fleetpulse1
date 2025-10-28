@@ -4,7 +4,7 @@ import Header from '../components/Header';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -13,7 +13,6 @@ const ProfilePage = () => {
     navigate('/login');
   };
 
-  // In a real app, this user data would be fetched from a protected backend endpoint
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -24,11 +23,13 @@ const ProfilePage = () => {
 
         if (response.ok) {
           const data = await response.json();
-          setUser(data);
+          setCurrentUser(data);
         } else {
+          console.error("Failed to fetch user data:", response.statusText); // Log actual error
           setError('Failed to fetch user profile.');
         }
       } catch (err) {
+        console.error("Error fetching user data:", err); // Log actual error
         setError('Could not connect to the server.');
       } finally {
         setIsLoading(false);
@@ -44,7 +45,7 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <Header />
+      <Header currentUser={currentUser} />
       <main className="container mx-auto p-4 md:p-8 relative">
         <Link
           to="/"
@@ -57,12 +58,12 @@ const ProfilePage = () => {
         </Link>
         {error ? (
           <p className="text-red-500 text-center">{error}</p>
-        ) : user ? (
+        ) : currentUser ? (
           <div className="bg-gray-800 p-8 rounded-lg shadow-xl max-w-2xl mx-auto">
             <div className="flex flex-col items-center text-center">
-              <img src={`https://placehold.co/150x150/94a3b8/1e293b?text=${user.email.charAt(0).toUpperCase()}`} alt="Profile" className="w-32 h-32 rounded-full mb-4 border-4 border-sky-500" />
-              <h1 className="text-3xl font-bold text-slate-100">{user.email}</h1>
-              <p className="text-md text-slate-400 mt-1">User ID: {user._id}</p>
+              <img src={`https://placehold.co/150x150/94a3b8/1e293b?text=${currentUser.email.charAt(0).toUpperCase()}`} alt="Profile" className="w-32 h-32 rounded-full mb-4 border-4 border-sky-500" />
+              <h1 className="text-3xl font-bold text-slate-100">{currentUser.email}</h1>
+              <p className="text-md text-slate-400 mt-1">User ID: {currentUser._id}</p>
             </div>
             <div className="mt-8 border-t border-gray-700 pt-8 flex justify-center">
               <button onClick={handleLogout} className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75 transition-colors duration-200">

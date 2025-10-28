@@ -19,6 +19,10 @@ const VehicleSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  isFavorited: {
+    type: Boolean,
+    default: false,
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
