@@ -7,6 +7,9 @@ import AddVehiclePage from './pages/AddVehiclePage';
 import VehicleDetailPage from './pages/VehicleDetailPage';
 import EditProfilePage from './pages/EditProfilePage';
 import UpdateVehiclePage from './pages/UpdateVehiclePage';
+import FuelLogsPage from './pages/FuelLogsPage';
+import MaintenanceLogsPage from './pages/MaintenanceLogsPage';
+import InsuranceLogsPage from './pages/InsuranceLogsPage';
 import SplashScreen from './components/SplashScreen';
 import { getAccessToken, clearTokens, fetchWithAuth } from './utils/api';
 
@@ -101,6 +104,9 @@ function App() {
           <Route path="/add-vehicle" element={<AddVehiclePage />} />
           <Route path="/vehicle/:id" element={<VehicleDetailPage />} />
           <Route path="/vehicle/:id/edit" element={<UpdateVehiclePage />} />
+          <Route path="/vehicle/:id/fuel-logs" element={<FuelLogsPage />} />
+          <Route path="/vehicle/:id/maintenance-logs" element={<MaintenanceLogsPage />} />
+          <Route path="/vehicle/:id/insurance-logs" element={<InsuranceLogsPage />} />
         </Route>
         {/* Redirect any other path to the home page for logged-in users, or login for others */}
         <Route path="*" element={<Navigate to="/" />} />
