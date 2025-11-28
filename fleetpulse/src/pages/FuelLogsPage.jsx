@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { getFuelLogs, saveFuelLogs } from '../utils/fuelLogs';
 import { formatINR } from '../utils/currency';
 import { fetchWithAuth, clearTokens } from '../utils/api';
@@ -107,6 +107,15 @@ const FuelLogsPage = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-slate-100 p-6">
       <div className="max-w-4xl mx-auto">
+        <Link
+          to={`/vehicle/${id}`}
+          className="inline-flex items-center text-slate-400 hover:text-sky-400 transition-colors mb-6"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 mr-2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Back to Vehicle Details
+        </Link>
         <header className="mb-8">
           <p className="text-sm text-slate-400 uppercase tracking-widest">Fuel Management</p>
           <h1 className="text-4xl font-bold mt-2">Fuel Logs</h1>

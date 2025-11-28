@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import OdometerCard from '../components/OdometerCard';
 import FuelLogCard from '../components/FuelLogCard';
 import MaintenanceLogCard from '../components/MaintenanceLogCard';
 import InsuranceLogCard from '../components/InsuranceLogCard';
@@ -111,6 +112,7 @@ const VehicleDetailPage = () => {
               )}
               {/* TODO: Add more vehicle details, edit/delete buttons, etc. */}
             </div>
+            <OdometerCard vehicleId={vehicle._id} />
             <FuelLogCard vehicleId={vehicle._id} />
             <MaintenanceLogCard vehicleId={vehicle._id} />
             <InsuranceLogCard vehicleId={vehicle._id} />

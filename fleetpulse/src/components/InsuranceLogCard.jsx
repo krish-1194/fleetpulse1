@@ -37,20 +37,37 @@ const InsuranceLogCard = ({ vehicleId }) => {
         <p className="text-slate-400">No insurance logs available for this vehicle.</p>
       )}
       {effectiveVehicleId ? (
-        <Link
-          to={`/vehicle/${effectiveVehicleId}/insurance-logs`}
-          className="inline-flex justify-center mt-4 px-4 py-2 bg-sky-600 text-white font-semibold rounded-lg shadow-md hover:bg-sky-700 transition-colors duration-200"
-        >
-          Add Insurance Entry
-        </Link>
+        <div className="flex gap-3 mt-4">
+          <Link
+            to={`/vehicle/${effectiveVehicleId}/insurance-logs`}
+            className="inline-flex justify-center px-4 py-2 bg-sky-600 text-white font-semibold rounded-lg shadow-md hover:bg-sky-700 transition-colors duration-200"
+          >
+            Open
+          </Link>
+          <Link
+            to={`/vehicle/${effectiveVehicleId}/log-summary`}
+            className="inline-flex justify-center px-4 py-2 bg-emerald-600 text-white font-semibold rounded-lg shadow-md hover:bg-emerald-700 transition-colors duration-200"
+          >
+            Summary
+          </Link>
+        </div>
       ) : (
-        <button
-          type="button"
-          disabled
-          className="mt-4 px-4 py-2 bg-slate-600 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed"
-        >
-          Add Insurance Entry
-        </button>
+        <div className="flex gap-3 mt-4">
+          <button
+            type="button"
+            disabled
+            className="px-4 py-2 bg-slate-600 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed"
+          >
+            Open
+          </button>
+          <button
+            type="button"
+            disabled
+            className="px-4 py-2 bg-slate-600 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed"
+          >
+            Summary
+          </button>
+        </div>
       )}
     </div>
   );

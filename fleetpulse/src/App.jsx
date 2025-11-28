@@ -10,6 +10,7 @@ import UpdateVehiclePage from './pages/UpdateVehiclePage';
 import FuelLogsPage from './pages/FuelLogsPage';
 import MaintenanceLogsPage from './pages/MaintenanceLogsPage';
 import InsuranceLogsPage from './pages/InsuranceLogsPage';
+import LogSummaryPage from './pages/LogSummaryPage';
 import SplashScreen from './components/SplashScreen';
 import { getAccessToken, clearTokens, fetchWithAuth } from './utils/api';
 
@@ -107,6 +108,7 @@ function App() {
           <Route path="/vehicle/:id/fuel-logs" element={<FuelLogsPage />} />
           <Route path="/vehicle/:id/maintenance-logs" element={<MaintenanceLogsPage />} />
           <Route path="/vehicle/:id/insurance-logs" element={<InsuranceLogsPage />} />
+          <Route path="/vehicle/:id/log-summary" element={<LogSummaryPage />} />
         </Route>
         {/* Redirect any other path to the home page for logged-in users, or login for others */}
         <Route path="*" element={<Navigate to="/" />} />
