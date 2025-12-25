@@ -50,7 +50,30 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({ credentials: true, origin: process.env.FRONTEND_ORIGIN })); // Use FRONTEND_ORIGIN as origin
+// Configure CORS to allow both HTTP and HTTPS origins for localhost in development
+const allowedOrigins = [
+  process.env.FRONTEND_ORIGIN,
+  process.env.FRONTEND_ORIGIN?.replace('http://', 'https://'), // Also allow HTTPS version
+  process.env.FRONTEND_ORIGIN?.replace('https://', 'http://'), // Also allow HTTP version
+].filter(Boolean); // Remove any undefined values
+
+app.use(cors({ 
+  credentials: true, 
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin is in the allowed list
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else if (origin.includes('localhost:5173')) {
+      // For development, allow any localhost:5173 origin (HTTP or HTTPS)
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
 app.use(express.json()); // Enable parsing of JSON bodies
 app.use(cookieParser()); // Use cookie-parser middleware
 

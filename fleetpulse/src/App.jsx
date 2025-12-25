@@ -13,6 +13,7 @@ import InsuranceLogsPage from './pages/InsuranceLogsPage';
 import LogSummaryPage from './pages/LogSummaryPage';
 import SplashScreen from './components/SplashScreen';
 import { getAccessToken, clearTokens, fetchWithAuth } from './utils/api';
+import './utils/migration'; // Import migration utility to make it available
 
 /**
  * A component to protect routes.

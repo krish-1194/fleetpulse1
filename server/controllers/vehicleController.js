@@ -68,7 +68,7 @@ export const getVehicleById = async (req, res) => {
 // @route   PUT /api/vehicles/:id
 // @access  Private
 export const updateVehicle = async (req, res) => {
-  const { name, year, location, imageUrl, fuelType, registeredName, transmissionType, registrationNo } = req.body;
+  const { name, year, location, imageUrl, fuelType, registeredName, transmissionType, registrationNo, isFavorited } = req.body;
 
   try {
     let vehicle = await Vehicle.findById(req.params.id);
@@ -83,6 +83,11 @@ export const updateVehicle = async (req, res) => {
     }
 
     const updateFields = { name, year, location, imageUrl, fuelType, registeredName, transmissionType, registrationNo };
+    
+    // Only update isFavorited if it's provided
+    if (typeof isFavorited === 'boolean') {
+      updateFields.isFavorited = isFavorited;
+    }
 
     vehicle = await Vehicle.findByIdAndUpdate(req.params.id, updateFields, { new: true, runValidators: true });
 

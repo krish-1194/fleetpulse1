@@ -9,13 +9,17 @@ const AddVehiclePage = () => {
   const [year, setYear] = useState('');
   const [location, setLocation] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [fuelType, setFuelType] = useState('');
+  const [registeredName, setRegisteredName] = useState('');
+  const [transmissionType, setTransmissionType] = useState('');
+  const [registrationNo, setRegistrationNo] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    const vehicleData = { name, year: parseInt(year), location, imageUrl };
+    const vehicleData = { name, year: parseInt(year), location, imageUrl, fuelType, registeredName, transmissionType, registrationNo };
 
     console.log('Submitting vehicle data:', vehicleData);
 
@@ -87,9 +91,41 @@ const AddVehiclePage = () => {
               required
             />
             <input
+              type="text"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              placeholder="Fuel Type (e.g., Petrol, Diesel)"
+              value={fuelType}
+              onChange={(e) => setFuelType(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              placeholder="Registered Name"
+              value={registeredName}
+              onChange={(e) => setRegisteredName(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              placeholder="Transmission Type (e.g., Manual, Automatic)"
+              value={transmissionType}
+              onChange={(e) => setTransmissionType(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              placeholder="Registration Number"
+              value={registrationNo}
+              onChange={(e) => setRegistrationNo(e.target.value)}
+              required
+            />
+            <input
               type="url"
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
-              placeholder="Image URL"
+              placeholder="Image URL (optional)"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
             />
